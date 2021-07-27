@@ -50,7 +50,7 @@
         ],
         "post-install-cmd": [
             "php artisan clear-compiled",
-            "php artisan migrate:fresh --seed"
+            "php artisan db:seed --force"
         ]
     },
     "extra": {
