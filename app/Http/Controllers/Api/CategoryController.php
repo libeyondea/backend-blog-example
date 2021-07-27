@@ -15,7 +15,7 @@ class CategoryController extends ApiController
      */
     public function index()
     {
-        $categoryQuery = new Category;
+        $categoryQuery = Category::withCount('articles')->orderBy('articles_count', 'desc');
         $categories = fractal($categoryQuery->orderBy('created_at', 'desc')->get(), new CategoryTransformer);
         return $this->respondSuccess($categories);
     }
