@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\TagController;
 
 
 /*
@@ -24,4 +25,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::apiResources([
     'articles' => ArticleController::class,
     'categories' => CategoryController::class,
+    'tags' => TagController::class,
 ]);
