@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Models\Article;
+use App\Models\Tag;
 use App\Transformers\ArticleTransformer;
 
 class ArticleController extends ApiController
@@ -20,7 +21,16 @@ class ArticleController extends ApiController
         $pinned = $request->get('pinned', 0);
         $articleQuery = Article::where('pinned', $pinned)->where('published', 1);
         if ($request->has('related')) {
-            $articleQuery = $articleQuery->where('category_id', Article::where('slug', $request->related)->firstOrFail()->category_id);
+            $articleQuery = $articleQuery->where(function($subQuery) use ($request)
+            {
+                $subQuery->where('category_id',
+                    Article::where('slug', $request->related)->firstOrFail()->category_id
+                )->orWhereHas('tags', function($q) use ($request) {
+                    $q->whereIn('slug', Tag::whereHas('articles', function($q) use ($request) {
+                        $q->where('slug', $request->related);
+                    })->pluck('slug'));
+                });
+            })->where('slug', '!=', $request->related);
         } else if ($request->has('tag')) {
             $articleQuery = $articleQuery->whereHas('tags', function($q) use ($request) {
                 $q->where('slug', $request->tag);
