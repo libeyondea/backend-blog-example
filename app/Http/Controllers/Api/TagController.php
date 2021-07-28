@@ -39,7 +39,9 @@ class TagController extends ApiController
      */
     public function show($id)
     {
-        //
+        $tagQuery = Tag::where('slug', $id);
+        $tag = fractal($tagQuery->firstOrFail(), new TagTransformer);
+        return $this->respondSuccess($tag);
     }
 
     /**
