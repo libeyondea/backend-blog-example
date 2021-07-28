@@ -22,9 +22,10 @@ class CategoryFactory extends Factory
      */
     public function definition()
     {
+        $title = Str::ucfirst($this->faker->unique()->word());
         return [
-            'title' => Str::ucfirst($this->faker->word()),
-            'slug' => $this->faker->unique()->slug(2),
+            'title' => $title,
+            'slug' => Str::slug($title, '-'),
             'content' => $this->faker->sentence(),
         ];
     }
