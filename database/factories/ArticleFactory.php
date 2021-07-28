@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Article;
 use App\Models\User;
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ArticleFactory extends Factory
@@ -23,15 +24,16 @@ class ArticleFactory extends Factory
      */
     public function definition()
     {
+        $title = Str::remove('.', $this->faker->sentence());
         return [
             'user_id' => $this->faker->randomElement(User::pluck('id')),
             'category_id' => $this->faker->randomElement(Category::pluck('id')),
-            'title' => $this->faker->sentence(),
-            'slug' => $this->faker->unique()->slug(),
+            'title' => $title,
+            'slug' => Str::slug($title, '-') . '-' . Str::lower(Str::random(4)),
             'excerpt' => $this->faker->paragraph(),
             'image' => '1624602956.png',
             'content' => $this->faker->text(666),
-            'pinned' => 0,
+            'pinned' => 0 ,
             'published' => 1,
             'published_at' => now()
         ];
