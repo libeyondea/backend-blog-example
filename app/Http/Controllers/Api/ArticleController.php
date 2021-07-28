@@ -21,6 +21,14 @@ class ArticleController extends ApiController
         $articleQuery = Article::where('pinned', $pinned)->where('published', 1);
         if ($request->has('related')) {
             $articleQuery = $articleQuery->where('category_id', Article::where('slug', $request->related)->firstOrFail()->category_id);
+        } else if ($request->has('tag')) {
+            $articleQuery = $articleQuery->whereHas('tags', function($q) use ($request) {
+                $q->where('slug', $request->tag);
+            });
+        } else if ($request->has('category')) {
+            $articleQuery = $articleQuery->whereHas('category', function($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
         }
         $articlesCount = $articleQuery->get()->count();
         $articles = fractal($articleQuery->orderBy('created_at', 'desc')->skip($offset)->take($limit)->get(), new ArticleTransformer);
