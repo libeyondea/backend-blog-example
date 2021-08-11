@@ -1,0 +1,12 @@
+{
+	"printWidth": 130,
+	"trailingComma": "none",
+	"overrides": [
+		{
+			"files": "*.php",
+			"options": {
+				"trailingCommaPHP": false
+			}
+		}
+	]
+}

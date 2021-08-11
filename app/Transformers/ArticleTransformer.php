@@ -21,7 +21,7 @@ class ArticleTransformer extends TransformerAbstract
             'title' => $article->title,
             'slug' => $article->slug,
             'excerpt' => $article->excerpt,
-            'image' => config('custom.img_url') . '/' . $article->image,
+            'image' => $article->image ? config('custom.img_url') . '/' . $article->image : null,
             'content' => $article->content,
             'pinned' => $article->pinned,
             'published' => $article->published,
