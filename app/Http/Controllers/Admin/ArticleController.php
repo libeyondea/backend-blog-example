@@ -29,18 +29,22 @@ class ArticleController extends CustomController
 		$sortDirection = $request->get('sort_direction', 'desc');
 
 		$articleQuery = new Article();
-		if ($request->sort_by === 'tags') {
-			$articleQuery = $articleQuery->withCount('tags')->orderBy('tags_count', $sortDirection);
-		} elseif ($request->sort_by === 'category') {
-			$articleQuery = $articleQuery
-				->join('categories', 'categories.id', '=', 'articles.category_id')
-				->select('articles.*')
-				->orderBy('categories.title', $sortDirection);
-		} elseif ($request->sort_by) {
-			$articleQuery = $articleQuery->orderBy($request->sort_by, $sortDirection);
+
+		if ($request->has('sort_by')) {
+			if ($request->sort_by === 'tags') {
+				$articleQuery = $articleQuery->withCount('tags')->orderBy('tags_count', $sortDirection);
+			} elseif ($request->sort_by === 'category') {
+				$articleQuery = $articleQuery
+					->join('categories', 'categories.id', '=', 'articles.category_id')
+					->select('articles.*')
+					->orderBy('categories.title', $sortDirection);
+			} else {
+				$articleQuery = $articleQuery->orderBy($request->sort_by, $sortDirection);
+			}
 		}
 
 		$articlesCount = $articleQuery->get()->count();
+
 		$articles = fractal(
 			$articleQuery
 				->orderBy('created_at', 'desc')

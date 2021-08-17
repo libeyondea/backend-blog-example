@@ -18,14 +18,23 @@ class CategoryController extends CustomController
 	{
 		$offset = $request->get('offset', 0);
 		$limit = $request->get('limit', 10);
+		$sortDirection = $request->get('sort_direction', 'desc');
 
-		$categoryQuery = Category::withCount('articles')
-			->orderBy('articles_count', 'desc')
-			->orderBy('created_at', 'desc');
+		$categoryQuery = new Category();
+
+		if ($request->has('sort_by')) {
+			if ($request->sort_by === 'total_articles') {
+				$categoryQuery = $categoryQuery->withCount('articles')->orderBy('articles_count', $sortDirection);
+			} else {
+				$categoryQuery = $categoryQuery->orderBy($request->sort_by, $sortDirection);
+			}
+		}
 
 		$categoriesCount = $categoryQuery->get()->count();
+
 		$categories = fractal(
 			$categoryQuery
+				->orderBy('created_at', 'desc')
 				->skip($offset)
 				->take($limit)
 				->get(),

@@ -9,67 +9,83 @@ use App\Transformers\TagTransformer;
 
 class TagController extends CustomController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
-    {
-        $offset = $request->get('offset', 0);
-        $limit = $request->get('limit', 10);
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index(Request $request)
+	{
+		$offset = $request->get('offset', 0);
+		$limit = $request->get('limit', 10);
+		$sortDirection = $request->get('sort_direction', 'desc');
 
-        $categoryQuery = Tag::withCount('articles')->orderBy('articles_count', 'desc')->orderBy('created_at', 'desc');
+		$tagQuery = new Tag();
 
-        $categoriesCount = $categoryQuery->get()->count();
-        $categories = fractal($categoryQuery->skip($offset)->take($limit)->get(), new TagTransformer);
-        return $this->respondSuccessWithPagination($categories, $categoriesCount);
-    }
+		if ($request->has('sort_by')) {
+			if ($request->sort_by === 'total_articles') {
+				$tagQuery = $tagQuery->withCount('articles')->orderBy('articles_count', $sortDirection);
+			} else {
+				$tagQuery = $tagQuery->orderBy($request->sort_by, $sortDirection);
+			}
+		}
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+		$tagsCount = $tagQuery->get()->count();
+		$tags = fractal(
+			$tagQuery
+				->orderBy('created_at', 'desc')
+				->skip($offset)
+				->take($limit)
+				->get(),
+			new TagTransformer()
+		);
+		return $this->respondSuccessWithPagination($tags, $tagsCount);
+	}
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $tagQuery = Tag::where('slug', $id);
-        $tag = fractal($tagQuery->firstOrFail(), new TagTransformer);
-        return $this->respondSuccess($tag);
-    }
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(Request $request)
+	{
+		//
+	}
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+	/**
+	 * Display the specified resource.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function show($id)
+	{
+		$tagQuery = Tag::where('slug', $id);
+		$tag = fractal($tagQuery->firstOrFail(), new TagTransformer());
+		return $this->respondSuccess($tag);
+	}
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update(Request $request, $id)
+	{
+		//
+	}
+
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy($id)
+	{
+		//
+	}
 }
