@@ -54,6 +54,7 @@
 			"php artisan clear-compiled",
 			"chmod -R 777 storage",
 			"php artisan migrate:fresh --seed --force",
+			"php artisan passport:install --force",
 			"php artisan passport:keys"
 		]
 	},
