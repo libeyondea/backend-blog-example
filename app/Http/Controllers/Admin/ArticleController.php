@@ -66,7 +66,7 @@ class ArticleController extends CustomController
 	{
 		$createArticle = new Article();
 		$createArticle->category_id = $request->category;
-		$createArticle->user_id = 1; // auth()->user()->id
+		$createArticle->user_id = auth()->user()->id;
 		$createArticle->title = $request->title;
 		$createArticle->slug = $request->slug;
 		$createArticle->content = $request->content;
@@ -79,9 +79,17 @@ class ArticleController extends CustomController
 			'...'
 		);
 
+		// AWS S3
+		//if ($request->hasfile('image')) {
+		//	$imageName = time() . '.' . $request->file('image')->extension();
+		//	Storage::disk('s3')->put('images/' . $imageName, file_get_contents($request->file('image')), 'public');
+		//	$createArticle->image = $imageName;
+		//}
+
+		// Public folder
 		if ($request->hasfile('image')) {
 			$imageName = time() . '.' . $request->file('image')->extension();
-			Storage::disk('s3')->put('images/' . $imageName, file_get_contents($request->file('image')), 'public');
+			Storage::put($imageName, file_get_contents($request->file('image')));
 			$createArticle->image = $imageName;
 		}
 
@@ -139,7 +147,7 @@ class ArticleController extends CustomController
 	{
 		$updateArticle = Article::where('id', $id)->firstOrFail();
 		$updateArticle->category_id = $request->category;
-		$updateArticle->user_id = 1; // auth()->user()->id
+		$updateArticle->user_id = auth()->user()->id;
 		$updateArticle->title = $request->title;
 		$updateArticle->slug = $request->slug;
 		$updateArticle->content = $request->content;
@@ -152,13 +160,24 @@ class ArticleController extends CustomController
 			'...'
 		);
 
-		if ($request->hasfile('image')) {
+		/* if ($request->hasfile('image')) {
 			$oldImage = 'images/' . $updateArticle->image;
 			if (Storage::disk('s3')->exists($oldImage)) {
 				Storage::disk('s3')->delete($oldImage);
 			}
 			$imageName = time() . '.' . $request->file('image')->extension();
 			Storage::disk('s3')->put('images/' . $imageName, file_get_contents($request->file('image')), 'public');
+			$updateArticle->image = $imageName;
+		} */
+
+		// Public folder
+		if ($request->hasfile('image')) {
+			$oldImage = $updateArticle->image;
+			if (Storage::exists($oldImage)) {
+				Storage::delete($oldImage);
+			}
+			$imageName = time() . '.' . $request->file('image')->extension();
+			Storage::put($imageName, file_get_contents($request->file('image')));
 			$updateArticle->image = $imageName;
 		}
 

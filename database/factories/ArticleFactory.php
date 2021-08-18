@@ -31,7 +31,7 @@ class ArticleFactory extends Factory
 			'title' => $title,
 			'slug' => Str::slug($title, '-') . '-' . Str::lower(Str::random(4)),
 			'excerpt' => $this->faker->paragraph(),
-			'image' => '1624602956.png',
+			'image' => '6666666666.png',
 			'content' => $this->faker->text(666),
 			'pinned' => 0,
 			'published' => 1,

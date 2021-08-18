@@ -7,13 +7,13 @@ use App\Models\ArticleTag;
 
 class ArticleTagSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
-    {
-        ArticleTag::factory(333)->create();
-    }
+	/**
+	 * Run the database seeds.
+	 *
+	 * @return void
+	 */
+	public function run()
+	{
+		ArticleTag::factory(166)->create();
+	}
 }
