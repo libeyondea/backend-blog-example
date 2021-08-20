@@ -62,7 +62,7 @@ class CategoryController extends CustomController
 	 */
 	public function show($id)
 	{
-		$categoryQuery = Category::where('slug', $id);
+		$categoryQuery = Category::where('id', $id);
 		$category = fractal($categoryQuery->firstOrFail(), new CategoryTransformer());
 		return $this->respondSuccess($category);
 	}

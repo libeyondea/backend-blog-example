@@ -61,7 +61,7 @@ class TagController extends CustomController
 	 */
 	public function show($id)
 	{
-		$tagQuery = Tag::where('slug', $id);
+		$tagQuery = Tag::where('id', $id);
 		$tag = fractal($tagQuery->firstOrFail(), new TagTransformer());
 		return $this->respondSuccess($tag);
 	}
