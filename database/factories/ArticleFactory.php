@@ -27,7 +27,6 @@ class ArticleFactory extends Factory
 		$title = Str::remove('.', $this->faker->sentence());
 		return [
 			'user_id' => $this->faker->randomElement(User::pluck('id')),
-			'category_id' => $this->faker->randomElement(Category::pluck('id')),
 			'title' => $title,
 			'slug' => Str::slug($title, '-') . '-' . Str::lower(Str::random(4)),
 			'excerpt' => $this->faker->paragraph(),

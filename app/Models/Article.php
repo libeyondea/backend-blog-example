@@ -7,20 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
-    use HasFactory;
+	use HasFactory;
 
-    public function user()
-    {
-    	return $this->belongsTo(User::class, 'user_id', 'id');
-    }
+	public function user()
+	{
+		return $this->belongsTo(User::class, 'user_id', 'id');
+	}
 
-    public function category()
-    {
-    	return $this->belongsTo(Category::class, 'category_id', 'id');
-    }
+	public function categories()
+	{
+		return $this->belongsToMany(Category::class, 'article_categories');
+	}
 
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class, 'article_tags');
-    }
+	public function tags()
+	{
+		return $this->belongsToMany(Tag::class, 'article_tags');
+	}
 }

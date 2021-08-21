@@ -6,7 +6,9 @@ use App\Http\Controllers\CustomController;
 use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\ArticleTag;
+use App\Models\ArticleCategory;
 use App\Models\Tag;
+use App\Models\Category;
 use App\Transformers\ArticleTransformer;
 use App\Http\Requests\Admin\StoreArticleRequest;
 use App\Http\Requests\Admin\UpdateArticleRequest;
@@ -33,11 +35,8 @@ class ArticleController extends CustomController
 		if ($request->has('sort_by')) {
 			if ($request->sort_by === 'tags') {
 				$articleQuery = $articleQuery->withCount('tags')->orderBy('tags_count', $sortDirection);
-			} elseif ($request->sort_by === 'category') {
-				$articleQuery = $articleQuery
-					->join('categories', 'categories.id', '=', 'articles.category_id')
-					->select('articles.*')
-					->orderBy('categories.title', $sortDirection);
+			} elseif ($request->sort_by === 'categories') {
+				$articleQuery = $articleQuery->withCount('categories')->orderBy('categories_count', $sortDirection);
 			} else {
 				$articleQuery = $articleQuery->orderBy($request->sort_by, $sortDirection);
 			}
@@ -65,10 +64,8 @@ class ArticleController extends CustomController
 	public function store(StoreArticleRequest $request)
 	{
 		$createArticle = new Article();
-		$createArticle->category_id = $request->category;
 		$createArticle->user_id = auth()->user()->id;
 		$createArticle->title = $request->title;
-		$createArticle->slug = $request->slug;
 		$createArticle->content = $request->content;
 		$createArticle->pinned = $request->pinned;
 		$createArticle->published = $request->published;
@@ -78,6 +75,16 @@ class ArticleController extends CustomController
 			166,
 			'...'
 		);
+
+		if ($request->slug) {
+			$slug = Str::slug($request->slug, '-');
+		} else {
+			$slug = Str::slug($request->title, '-');
+		}
+		if (Article::where('slug', $slug)->exists()) {
+			$slug = $slug . '-' . Str::lower(Str::random(4));
+		}
+		$createArticle->slug = $slug;
 
 		// AWS S3
 		//if ($request->hasfile('image')) {
@@ -96,13 +103,29 @@ class ArticleController extends CustomController
 		$createArticle->save();
 		$lastIdArticle = $createArticle->id;
 
+		foreach ($request->categories as $key => $category) {
+			$categoryId = $category['id'];
+			$checkArticleCategory = ArticleCategory::where('article_id', $lastIdArticle)
+				->where('category_id', $categoryId)
+				->first();
+			if (!$checkArticleCategory) {
+				$articleCategory = new ArticleCategory();
+				$articleCategory->article_id = $lastIdArticle;
+				$articleCategory->category_id = $categoryId;
+				$articleCategory->save();
+			}
+		}
+
 		foreach ($request->tags as $key => $tag) {
 			if (isset($tag['is_new']) && $tag['is_new'] === true) {
 				$convertTitleToSlug = Str::slug($tag['title'], '-');
 				$newTag = new Tag();
 				$newTag->title = $tag['title'];
-				$newTag->slug = $convertTitleToSlug;
 				$newTag->content = $tag['title'];
+				if (Tag::where('slug', $convertTitleToSlug)->exists()) {
+					$convertTitleToSlug = $convertTitleToSlug . '-' . Str::lower(Str::random(4));
+				}
+				$newTag->slug = $convertTitleToSlug;
 				$newTag->save();
 				$tagId = $newTag->id;
 			} else {
@@ -146,19 +169,31 @@ class ArticleController extends CustomController
 	public function update(UpdateArticleRequest $request, $id)
 	{
 		$updateArticle = Article::where('id', $id)->firstOrFail();
-		$updateArticle->category_id = $request->category;
 		$updateArticle->user_id = auth()->user()->id;
 		$updateArticle->title = $request->title;
-		$updateArticle->slug = $request->slug;
 		$updateArticle->content = $request->content;
 		$updateArticle->pinned = $request->pinned;
 		$updateArticle->published = $request->published;
-		$updateArticle->published_at = Carbon::now()->toDateTimeString();
+		$updateArticle->published_at = $request->published ? Carbon::now()->toDateTimeString() : null;
 		$updateArticle->excerpt = Str::limit(
 			preg_replace('/\s+/', ' ', trim(strip_tags(Str::markdown($request->content)))),
 			166,
 			'...'
 		);
+
+		if ($request->slug) {
+			$slug = Str::slug($request->slug, '-');
+		} else {
+			$slug = Str::slug($request->title, '-');
+		}
+		if (
+			Article::where('slug', $slug)
+				->where('id', '!=', $id)
+				->exists()
+		) {
+			$slug = $slug . '-' . Str::lower(Str::random(4));
+		}
+		$updateArticle->slug = $slug;
 
 		/* if ($request->hasfile('image')) {
 			$oldImage = 'images/' . $updateArticle->image;
@@ -189,13 +224,34 @@ class ArticleController extends CustomController
 			$deleteArticleTag->delete();
 		}
 
+		$deleteArticleCategory = ArticleCategory::where('article_id', $lastIdArticle);
+		if ($deleteArticleCategory->get()->count() > 0) {
+			$deleteArticleCategory->delete();
+		}
+
+		foreach ($request->categories as $key => $category) {
+			$categoryId = $category['id'];
+			$checkArticleCategory = ArticleCategory::where('article_id', $lastIdArticle)
+				->where('category_id', $categoryId)
+				->first();
+			if (!$checkArticleCategory) {
+				$articleCategory = new ArticleCategory();
+				$articleCategory->article_id = $lastIdArticle;
+				$articleCategory->category_id = $categoryId;
+				$articleCategory->save();
+			}
+		}
+
 		foreach ($request->tags as $key => $tag) {
 			if (isset($tag['is_new']) && $tag['is_new'] === true) {
 				$convertTitleToSlug = Str::slug($tag['title'], '-');
 				$newTag = new Tag();
 				$newTag->title = $tag['title'];
-				$newTag->slug = $convertTitleToSlug;
 				$newTag->content = $tag['title'];
+				if (Tag::where('slug', $convertTitleToSlug)->exists()) {
+					$convertTitleToSlug = $convertTitleToSlug . '-' . Str::lower(Str::random(4));
+				}
+				$newTag->slug = $convertTitleToSlug;
 				$newTag->save();
 				$tagId = $newTag->id;
 			} else {

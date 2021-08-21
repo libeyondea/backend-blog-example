@@ -6,6 +6,9 @@ use App\Http\Controllers\CustomController;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Transformers\CategoryTransformer;
+use App\Http\Requests\Admin\StoreCategoryRequest;
+use App\Http\Requests\Admin\UpdateCategoryRequest;
+use Illuminate\Support\Str;
 
 class CategoryController extends CustomController
 {
@@ -49,9 +52,26 @@ class CategoryController extends CustomController
 	 * @param  \Illuminate\Http\Request  $request
 	 * @return \Illuminate\Http\Response
 	 */
-	public function store(Request $request)
+	public function store(StoreCategoryRequest $request)
 	{
-		//
+		$createCategory = new Category();
+		$createCategory->title = $request->title;
+		$createCategory->content = $request->content;
+
+		if ($request->slug) {
+			$slug = Str::slug($request->slug, '-');
+		} else {
+			$slug = Str::slug($request->title, '-');
+		}
+		if (Category::where('slug', $slug)->exists()) {
+			$slug = $slug . '-' . Str::lower(Str::random(4));
+		}
+		$createCategory->slug = $slug;
+
+		$createCategory->save();
+
+		$category = fractal(Category::where('id', $createCategory->id)->firstOrFail(), new CategoryTransformer());
+		return $this->respondSuccess($category);
 	}
 
 	/**
@@ -74,9 +94,30 @@ class CategoryController extends CustomController
 	 * @param  int  $id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, $id)
+	public function update(UpdateCategoryRequest $request, $id)
 	{
-		//
+		$updateCategory = Category::where('id', $id)->firstOrFail();
+		$updateCategory->title = $request->title;
+		$updateCategory->content = $request->content;
+
+		if ($request->slug) {
+			$slug = Str::slug($request->slug, '-');
+		} else {
+			$slug = Str::slug($request->title, '-');
+		}
+		if (
+			Category::where('slug', $slug)
+				->where('id', '!=', $id)
+				->exists()
+		) {
+			$slug = $slug . '-' . Str::lower(Str::random(4));
+		}
+		$updateCategory->slug = $slug;
+
+		$updateCategory->save();
+
+		$category = fractal(Category::where('id', $updateCategory->id)->firstOrFail(), new CategoryTransformer());
+		return $this->respondSuccess($category);
 	}
 
 	/**
@@ -87,6 +128,8 @@ class CategoryController extends CustomController
 	 */
 	public function destroy($id)
 	{
-		//
+		$deleteCategory = Category::where('id', $id)->firstOrFail();
+		$deleteCategory->delete();
+		return $this->respondSuccess($deleteCategory);
 	}
 }

@@ -25,7 +25,14 @@ class ArticleController extends CustomController
 			$articleQuery = $articleQuery
 				->where(function ($subQuery) use ($request) {
 					$subQuery
-						->where('category_id', Article::where('slug', $request->related)->firstOrFail()->category_id)
+						->whereHas('categories', function ($q) use ($request) {
+							$q->whereIn(
+								'slug',
+								Tag::whereHas('articles', function ($q) use ($request) {
+									$q->where('slug', $request->related);
+								})->pluck('slug')
+							);
+						})
 						->orWhereHas('tags', function ($q) use ($request) {
 							$q->whereIn(
 								'slug',
@@ -41,7 +48,7 @@ class ArticleController extends CustomController
 				$q->where('slug', $request->tag);
 			});
 		} elseif ($request->has('category')) {
-			$articleQuery = $articleQuery->whereHas('category', function ($q) use ($request) {
+			$articleQuery = $articleQuery->whereHas('categories', function ($q) use ($request) {
 				$q->where('slug', $request->category);
 			});
 		}
