@@ -42,7 +42,7 @@ return [
 
 		'images' => [
 			'driver' => 'local',
-			'root' => public_path('images')
+			'root' => public_path(env('IMG_FOLDER', 'images'))
 		],
 
 		's3' => [
