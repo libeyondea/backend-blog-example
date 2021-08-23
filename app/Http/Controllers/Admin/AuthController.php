@@ -14,7 +14,7 @@ class AuthController extends CustomController
 	{
 		$credentials = request(['user_name', 'password']);
 
-		if (!auth()->attempt($credentials) || !auth()->user()->is_admin) {
+		if (!auth()->attempt($credentials) || auth()->user()->role !== 'administrator') {
 			return $this->respondUnprocessableEntity('Incorrect username or password');
 		}
 

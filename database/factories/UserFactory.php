@@ -31,7 +31,7 @@ class UserFactory extends Factory
 			'email_verified_at' => null,
 			'password' => bcrypt(Str::random(6)),
 			'remember_token' => null,
-			'is_admin' => 0
+			'role' => null
 		];
 	}
 

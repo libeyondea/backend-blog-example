@@ -19,8 +19,7 @@ class ArticleController extends CustomController
 	{
 		$offset = $request->get('offset', 0);
 		$limit = $request->get('limit', 10);
-		$pinned = $request->get('pinned', 0);
-		$articleQuery = Article::where('pinned', $pinned)->where('published', 1);
+		$articleQuery = Article::where('article_status', 'publish');
 		if ($request->has('related')) {
 			$articleQuery = $articleQuery
 				->where(function ($subQuery) use ($request) {
@@ -83,7 +82,7 @@ class ArticleController extends CustomController
 	 */
 	public function show($id)
 	{
-		$articleQuery = Article::where('slug', $id)->where('published', 1);
+		$articleQuery = Article::where('slug', $id)->where('article_status', 'publish');
 		$article = fractal($articleQuery->firstOrFail(), new ArticleTransformer());
 		return $this->respondSuccess($article);
 	}

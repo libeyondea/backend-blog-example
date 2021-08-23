@@ -16,9 +16,7 @@ class StoreArticleRequest extends CustomRequest
 			'categories' => 'required|array|min:1|max:6',
 			'image' => 'required|image|mimes:jpeg,jpg,png,gif|max:2048',
 			'tags' => 'required|array|min:1|max:6',
-			'tags.*.title' => 'required|string|max:66',
-			'pinned' => 'required|boolean',
-			'published' => 'required|boolean'
+			'tags.*.title' => 'required|string|max:66'
 		];
 	}
 
@@ -42,9 +40,7 @@ class StoreArticleRequest extends CustomRequest
 	{
 		$this->merge([
 			'tags' => json_decode($this->tags, true),
-			'categories' => json_decode($this->categories, true),
-			'pinned' => filter_var($this->pinned, FILTER_VALIDATE_BOOLEAN),
-			'published' => filter_var($this->published, FILTER_VALIDATE_BOOLEAN)
+			'categories' => json_decode($this->categories, true)
 		]);
 	}
 }

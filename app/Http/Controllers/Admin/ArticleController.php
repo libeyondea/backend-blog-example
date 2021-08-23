@@ -67,9 +67,8 @@ class ArticleController extends CustomController
 		$createArticle->user_id = auth()->user()->id;
 		$createArticle->title = $request->title;
 		$createArticle->content = $request->content;
-		$createArticle->pinned = $request->pinned;
-		$createArticle->published = $request->published;
-		$createArticle->published_at = $request->published ? Carbon::now()->toDateTimeString() : null;
+		$createArticle->article_status = $request->article_status;
+		$createArticle->comment_status = $request->comment_status;
 		$createArticle->excerpt = Str::limit(
 			preg_replace('/\s+/', ' ', trim(strip_tags(Str::markdown($request->content)))),
 			166,
@@ -172,9 +171,8 @@ class ArticleController extends CustomController
 		$updateArticle->user_id = auth()->user()->id;
 		$updateArticle->title = $request->title;
 		$updateArticle->content = $request->content;
-		$updateArticle->pinned = $request->pinned;
-		$updateArticle->published = $request->published;
-		$updateArticle->published_at = $request->published ? Carbon::now()->toDateTimeString() : null;
+		$updateArticle->article_status = $request->article_status;
+		$updateArticle->comment_status = $request->comment_status;
 		$updateArticle->excerpt = Str::limit(
 			preg_replace('/\s+/', ' ', trim(strip_tags(Str::markdown($request->content)))),
 			166,

@@ -18,12 +18,11 @@ class CreateArticlesTable extends Migration
 			$table->foreignId('user_id')->constrained('users');
 			$table->string('title');
 			$table->string('slug')->unique();
-			$table->string('excerpt', 666)->nullable();
-			$table->string('image')->nullable();
+			$table->string('excerpt', 666);
+			$table->string('image');
+			$table->string('article_status');
+			$table->string('comment_status');
 			$table->text('content');
-			$table->unsignedTinyInteger('pinned');
-			$table->unsignedTinyInteger('published');
-			$table->dateTime('published_at', $precision = 0)->nullable();
 			$table->timestamps();
 		});
 	}

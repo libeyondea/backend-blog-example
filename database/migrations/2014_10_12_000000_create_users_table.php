@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
 			$table->timestamp('email_verified_at')->nullable();
 			$table->string('password');
 			$table->rememberToken();
-			$table->unsignedTinyInteger('is_admin');
+			$table->string('role')->nullable();
 			$table->timestamps();
 		});
 	}
