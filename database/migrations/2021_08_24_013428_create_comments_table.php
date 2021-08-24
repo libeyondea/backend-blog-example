@@ -17,14 +17,15 @@ class CreateCommentsTable extends Migration
 			$table->id();
 			$table
 				->foreignId('article_id')
+				->constrained('articles')
 				->onUpdate('cascade')
-				->onDelete('cascade')
-				->constrained('articles');
+				->onDelete('cascade');
 			$table
 				->foreignId('user_id')
+
+				->constrained('users')
 				->onUpdate('cascade')
-				->onDelete('cascade')
-				->constrained('users');
+				->onDelete('cascade');
 			$table
 				->foreignId('parent_id')
 				->nullable()
