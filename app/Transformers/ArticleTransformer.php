@@ -19,13 +19,9 @@ class ArticleTransformer extends TransformerAbstract
 			'title' => $article->title,
 			'slug' => $article->slug,
 			'excerpt' => $article->excerpt,
-			'image' => $article->image ? config('custom.img_url') . '/' . $article->image : null,
 			'content' => $article->content,
-			'article_status' => $article->article_status,
-			'comment_status' => $article->comment_status,
-			'pinned' => $article->pinned,
-			'published' => $article->published,
-			'published_at' => $article->published_at,
+			'image' => $article->image ? config('custom.img_url') . '/' . $article->image : null,
+			'status' => $article->status,
 			'created_at' => $article->created_at,
 			'updated_at' => $article->updated_at
 		];

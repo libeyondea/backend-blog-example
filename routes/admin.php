@@ -28,6 +28,8 @@ Route::middleware('auth:api')->group(function () {
 		'tags' => TagController::class
 	]);
 
+	Route::put('articles/status/{article}', [ArticleController::class, 'updateStatus']);
+
 	Route::get('search', [SearchController::class, 'search']);
 
 	Route::get('logout', [AuthController::class, 'logout']);

@@ -32,6 +32,20 @@ class ArticleController extends CustomController
 
 		$articleQuery = new Article();
 
+		if ($request->has('status')) {
+			if ($request->status === 'publish') {
+				$articleQuery = $articleQuery->where('status', $request->status);
+			} elseif ($request->status === 'draft') {
+				$articleQuery = $articleQuery->where('status', $request->status);
+			} elseif ($request->status === 'pending') {
+				$articleQuery = $articleQuery->where('status', $request->status);
+			} elseif ($request->status === 'trash') {
+				$articleQuery = $articleQuery->where('status', $request->status);
+			} elseif ($request->status === 'all') {
+				$articleQuery = $articleQuery->where('status', '!=', 'trash');
+			}
+		}
+
 		if ($request->has('sort_by')) {
 			if ($request->sort_by === 'tags') {
 				$articleQuery = $articleQuery->withCount('tags')->orderBy('tags_count', $sortDirection);
@@ -42,7 +56,23 @@ class ArticleController extends CustomController
 			}
 		}
 
-		$articlesCount = $articleQuery->get()->count();
+		$articlesTotal = $articleQuery->get()->count();
+
+		$articlesTotalAll = Article::where('status', '!=', 'trash')
+			->get()
+			->count();
+		$articlesTotalPublished = Article::where('status', 'publish')
+			->get()
+			->count();
+		$articlesTotalTrash = Article::where('status', 'trash')
+			->get()
+			->count();
+		$articlesTotalDraft = Article::where('status', 'draft')
+			->get()
+			->count();
+		$articlesTotalPending = Article::where('status', 'pending')
+			->get()
+			->count();
 
 		$articles = fractal(
 			$articleQuery
@@ -52,7 +82,15 @@ class ArticleController extends CustomController
 				->get(),
 			new ArticleTransformer()
 		);
-		return $this->respondSuccessWithPagination($articles, $articlesCount);
+		return $this->respondSuccessWithPaginationCountClassify(
+			$articles,
+			$articlesTotal,
+			$articlesTotalAll,
+			$articlesTotalPublished,
+			$articlesTotalTrash,
+			$articlesTotalDraft,
+			$articlesTotalPending
+		);
 	}
 
 	/**
@@ -67,8 +105,7 @@ class ArticleController extends CustomController
 		$createArticle->user_id = auth()->user()->id;
 		$createArticle->title = $request->title;
 		$createArticle->content = $request->content;
-		$createArticle->article_status = $request->article_status;
-		$createArticle->comment_status = $request->comment_status;
+		$createArticle->status = $request->status;
 		$createArticle->excerpt = Str::limit(
 			preg_replace('/\s+/', ' ', trim(strip_tags(Str::markdown($request->content)))),
 			166,
@@ -153,7 +190,7 @@ class ArticleController extends CustomController
 	 */
 	public function show($id)
 	{
-		$articleQuery = Article::where('id', $id);
+		$articleQuery = Article::where('id', $id)->where('status', '!=', 'trash');
 		$article = fractal($articleQuery->firstOrFail(), new ArticleTransformer());
 		return $this->respondSuccess($article);
 	}
@@ -171,8 +208,7 @@ class ArticleController extends CustomController
 		$updateArticle->user_id = auth()->user()->id;
 		$updateArticle->title = $request->title;
 		$updateArticle->content = $request->content;
-		$updateArticle->article_status = $request->article_status;
-		$updateArticle->comment_status = $request->comment_status;
+		$updateArticle->status = $request->status;
 		$updateArticle->excerpt = Str::limit(
 			preg_replace('/\s+/', ' ', trim(strip_tags(Str::markdown($request->content)))),
 			166,
@@ -265,6 +301,24 @@ class ArticleController extends CustomController
 				$articleTag->save();
 			}
 		}
+
+		$article = fractal(Article::where('id', $lastIdArticle)->firstOrFail(), new ArticleTransformer());
+		return $this->respondSuccess($article);
+	}
+
+	public function updateStatus(Request $request, $id)
+	{
+		$updateArticle = Article::where('id', $id)->firstOrFail();
+		if ($request->has('status')) {
+			if ($request->status === 'trash') {
+				$updateArticle->status = 'trash';
+			} elseif ($request->status === 'untrash') {
+				$updateArticle->status = 'draft';
+			}
+		}
+		$updateArticle->save();
+
+		$lastIdArticle = $updateArticle->id;
 
 		$article = fractal(Article::where('id', $lastIdArticle)->firstOrFail(), new ArticleTransformer());
 		return $this->respondSuccess($article);

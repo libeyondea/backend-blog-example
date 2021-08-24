@@ -19,10 +19,9 @@ class CreateArticlesTable extends Migration
 			$table->string('title');
 			$table->string('slug')->unique();
 			$table->string('excerpt', 666);
-			$table->string('image');
-			$table->string('article_status');
-			$table->string('comment_status');
 			$table->text('content');
+			$table->string('image');
+			$table->string('status');
 			$table->timestamps();
 		});
 	}

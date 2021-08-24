@@ -32,8 +32,7 @@ class ArticleFactory extends Factory
 			'excerpt' => $this->faker->paragraph(),
 			'image' => '6666666666.png',
 			'content' => $this->faker->text(666),
-			'article_status' => 'publish',
-			'comment_status' => 'open'
+			'status' => 'publish',
 		];
 	}
 }

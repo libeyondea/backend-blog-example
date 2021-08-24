@@ -16,7 +16,7 @@ class CustomController extends Controller
 		return $this->respond(
 			[
 				'success' => true,
-				'data' => $data,
+				'data' => $data
 			],
 			$statusCode,
 			$headers
@@ -29,9 +29,38 @@ class CustomController extends Controller
 			[
 				'success' => true,
 				'data' => $data,
-				'meta' => [
-					'total' => $total,
+				'pagination' => [
+					'total' => $total
+				]
+			],
+			$statusCode,
+			$headers
+		);
+	}
+
+	protected function respondSuccessWithPaginationCountClassify(
+		$data,
+		$total,
+		$articlesTotalAll,
+		$articlesTotalPublished,
+		$articlesTotalTrash,
+		$articlesTotalDraft,
+		$articlesTotalPending,
+		$statusCode = 200,
+		$headers = []
+	) {
+		return $this->respond(
+			[
+				'success' => true,
+				'data' => $data,
+				'pagination' => [
+					'total' => $total
 				],
+				'total_all' => $articlesTotalAll,
+				'total_published' => $articlesTotalPublished,
+				'total_trash' => $articlesTotalTrash,
+				'total_draft' => $articlesTotalDraft,
+				'total_pending' => $articlesTotalPending
 			],
 			$statusCode,
 			$headers
@@ -45,8 +74,8 @@ class CustomController extends Controller
 				'success' => false,
 				'error' => [
 					'message' => $message,
-					'status' => $status,
-				],
+					'status' => $status
+				]
 			],
 			$status
 		);
