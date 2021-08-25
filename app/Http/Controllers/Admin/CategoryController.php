@@ -25,6 +25,14 @@ class CategoryController extends CustomController
 
 		$categoryQuery = new Category();
 
+		if ($request->has('q')) {
+			if ($request->q) {
+				$categoryQuery = $categoryQuery
+					->where('title', 'LIKE', '%' . $request->q . '%')
+					->orWhere('slug', 'LIKE', '%' . $request->q . '%');
+			}
+		}
+
 		if ($request->has('sort_by')) {
 			if ($request->sort_by === 'total_articles') {
 				$categoryQuery = $categoryQuery->withCount('articles')->orderBy('articles_count', $sortDirection);
