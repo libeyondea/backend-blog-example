@@ -26,22 +26,23 @@ class SearchController extends CustomController
 				->withCount('articles')
 				->orderBy('articles_count', 'desc');
 			$transformer = new TagTransformer();
-		} elseif ($type == 'article') {
-			$model = Article::where('title', 'LIKE', '%' . $q . '%')
-				->orWhere('slug', 'LIKE', '%' . $q . '%')
-				->orderBy('created_at', 'desc');
-			$transformer = new ArticleTransformer();
 		} elseif ($type == 'category') {
 			$model = Category::where('title', 'LIKE', '%' . $q . '%')
 				->orWhere('slug', 'LIKE', '%' . $q . '%')
 				->withCount('articles')
 				->orderBy('articles_count', 'desc');
 			$transformer = new CategoryTransformer();
+		} elseif ($type == 'article') {
+			$model = Article::where('title', 'LIKE', '%' . $q . '%')
+				->orWhere('slug', 'LIKE', '%' . $q . '%')
+				->orderBy('created_at', 'desc');
+			$transformer = new ArticleTransformer();
 		} else {
 			return $this->respondNotFound();
 		}
 
 		$totalCount = $model->get()->count();
+
 		$listModel = fractal(
 			$model
 				->skip($offset)
