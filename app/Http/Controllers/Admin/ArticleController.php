@@ -32,6 +32,14 @@ class ArticleController extends CustomController
 
 		$articleQuery = new Article();
 
+		if ($request->has('q')) {
+			if ($request->q) {
+				$articleQuery = $articleQuery
+					->where('title', 'LIKE', '%' . $request->q . '%')
+					->orWhere('slug', 'LIKE', '%' . $request->q . '%');
+			}
+		}
+
 		if ($request->has('status')) {
 			if ($request->status === 'publish') {
 				$articleQuery = $articleQuery->where('status', $request->status);
