@@ -25,6 +25,14 @@ class TagController extends CustomController
 
 		$tagQuery = new Tag();
 
+		if ($request->has('q')) {
+			if ($request->q) {
+				$tagQuery = $tagQuery
+					->where('title', 'LIKE', '%' . $request->q . '%')
+					->orWhere('slug', 'LIKE', '%' . $request->q . '%');
+			}
+		}
+
 		if ($request->has('sort_by')) {
 			if ($request->sort_by === 'total_articles') {
 				$tagQuery = $tagQuery->withCount('articles')->orderBy('articles_count', $sortDirection);
